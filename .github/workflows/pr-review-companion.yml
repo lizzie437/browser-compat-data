@@ -63,7 +63,7 @@ jobs:
       - name: Post message in PR
         run: |
           AUTHOR="github-actions"
-          BODY_MARKER="<!-- pr-review-companion -->"
+          MARKER="<!-- pr-review-companion -->"
           BODY="${MARKER}
 
           ${COMMENT}"
