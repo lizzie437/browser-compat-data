@@ -1,0 +1,69 @@
+name: PR Review Companion
+
+on:
+  pull_request:
+
+permissions:
+  # Post comment in pull request.
+  pull-requests: write
+
+concurrency:
+  group: pr-review-companion-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: flat-diff
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Diff (default)
+        run: npm run diff:flat -- $PR_NUMBER
+
+      - name: Diff (--no-group)
+        run: npm run diff:flat -- $PR_NUMBER --no-group
+
+      - name: Diff (--mirror)
+        run: npm run diff:flat -- $PR_NUMBER --mirror
+
+      - name: Post message in PR
+        run: |
+          COMMENT_ID=$(gh pr view "$PR_NUMBER" --repo "${{ github.repository }}" --comments --json comments \
+            --jq ".comments | sort_by(.createdAt) | map(select(.author.login == \"github-actions\")) | .[0].id")
+          if [ -n "$COMMENT_ID" ]; then
+            gh api graphql -f query='
+                mutation($id:ID!, $body:String!) {
+                  updateIssueComment(input:{id:$id, body:$body}) {
+                    issueComment {
+                      id
+                    }
+                  }
+                }' -f id="$COMMENT_ID" -f body="$BODY"
+          else
+            gh pr comment "$PR_NUMBER" --repo "${{ github.repository }}" --body "$BODY"
+          fi
+        env:
+          BODY: |
+            You can review the changes [grouped][1], [ungrouped][2], and [with mirroring applied][3].
+
+            [1]: ${{ env.RUN_URL }}#step:5:1
+            [2]: ${{ env.RUN_URL }}#step:6:1
+            [3]: ${{ env.RUN_URL }}#step:7:1
+          GITHUB_TOKEN: ${{ github.token }}
