@@ -78,10 +78,8 @@ jobs:
           fi
         env:
           BODY: |
-            You can review the changes [grouped by change][1a] (for small-medium PRs, optionally [with mirroring][1b]), [grouped by feature][2a] (for large PRs, optionally [with mirroring][2b]).
+            _Tip_: Review these changes [grouped by change][1] (recommended for most PRs), or [grouped by feature][2] (for large PRs).
 
-            [1a]: ${{ env.JOB_URL }}#step:5:1
-            [1b]: ${{ env.JOB_URL }}#step:6:1
-            [2a]: ${{ env.JOB_URL }}#step:7:1
-            [2b]: ${{ env.JOB_URL }}#step:8:1
+            [1]: ${{ env.JOB_URL }}#step:5:1
+            [2]: ${{ env.JOB_URL }}#step:7:1
           GITHUB_TOKEN: ${{ github.token }}
