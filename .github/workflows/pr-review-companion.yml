@@ -62,8 +62,14 @@ jobs:
 
       - name: Post message in PR
         run: |
+          AUTHOR="github-actions"
+          BODY_MARKER="<!-- pr-review-companion -->"
+          BODY="${MARKER}
+
+          ${COMMENT}"
+
           COMMENT_ID=$(gh pr view "$PR_NUMBER" --repo "${{ github.repository }}" --comments --json comments \
-            --jq ".comments | sort_by(.createdAt) | map(select(.author.login == \"github-actions\")) | .[0].id")
+            --jq ".comments | sort_by(.createdAt) | map(select(.author.login == \"$AUTHOR\") and .body | contains(\"$MARKER\")) | .[0].id")
           if [ -n "$COMMENT_ID" ]; then
             gh api graphql -f query='
                 mutation($id:ID!, $body:String!) {
@@ -77,7 +83,7 @@ jobs:
             gh pr comment "$PR_NUMBER" --repo "${{ github.repository }}" --body "$BODY"
           fi
         env:
-          BODY: |
+          COMMENT: |
             _Tip_: Review these changes [grouped by change][1] (recommended for most PRs), or [grouped by feature][2] (for large PRs).
 
             [1]: ${{ env.JOB_URL }}#step:5:1
