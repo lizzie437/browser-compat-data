@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_NUMBER: 26471
 
     steps:
       - name: Checkout
