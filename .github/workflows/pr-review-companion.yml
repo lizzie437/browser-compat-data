@@ -17,7 +17,6 @@ jobs:
 
     env:
       PR_NUMBER: ${{ github.event.pull_request.number }}
-      RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     steps:
       - name: Checkout
@@ -43,6 +42,11 @@ jobs:
       - name: Diff (--mirror)
         run: npm run diff:flat -- $PR_NUMBER --mirror
 
+      - name: Determine job url
+        run: |
+          job_id=$(gh api repos/${{ github.repository }}/actions/run/${{ github.run_id }}/jobs --jq '.jobs[0].id')
+          echo "JOB_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${job_id}" >> $GITHUB_ENV
+
       - name: Post message in PR
         run: |
           COMMENT_ID=$(gh pr view "$PR_NUMBER" --repo "${{ github.repository }}" --comments --json comments \
@@ -63,7 +67,7 @@ jobs:
           BODY: |
             You can review the changes [grouped][1], [ungrouped][2], and [with mirroring applied][3].
 
-            [1]: ${{ env.RUN_URL }}#step:5:1
-            [2]: ${{ env.RUN_URL }}#step:6:1
-            [3]: ${{ env.RUN_URL }}#step:7:1
+            [1]: ${{ env.JOB_URL }}#step:5:1
+            [2]: ${{ env.JOB_URL }}#step:6:1
+            [3]: ${{ env.JOB_URL }}#step:7:1
           GITHUB_TOKEN: ${{ github.token }}
