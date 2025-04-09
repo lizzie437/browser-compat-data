@@ -33,18 +33,23 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Diff (default)
+      - name: Diff (by change)
         run: npm run diff:flat -- $PR_NUMBER
         env:
           FORCE_COLOR: 3
 
-      - name: Diff (--no-group)
+      - name: Diff (by change, mirroring applied)
+        run: npm run diff:flat -- $PR_NUMBER --mirror
+        env:
+          FORCE_COLOR: 3
+
+      - name: Diff (by feature)
         run: npm run diff:flat -- $PR_NUMBER --no-group
         env:
           FORCE_COLOR: 3
 
-      - name: Diff (--mirror)
-        run: npm run diff:flat -- $PR_NUMBER --mirror
+      - name: Diff (by feature, mirroring applied)
+        run: npm run diff:flat -- $PR_NUMBER --no-group --mirror
         env:
           FORCE_COLOR: 3
 
@@ -73,9 +78,10 @@ jobs:
           fi
         env:
           BODY: |
-            You can review the changes [grouped][1], [ungrouped][2], and [with mirroring applied][3].
+            You can review the changes [grouped by change][1a] (for small-medium PRs, optionally [with mirroring][1b]), [grouped by feature][2a] (for large PRs, optionally [with mirroring][2b]).
 
-            [1]: ${{ env.JOB_URL }}#step:5:1
-            [2]: ${{ env.JOB_URL }}#step:6:1
-            [3]: ${{ env.JOB_URL }}#step:7:1
+            [1a]: ${{ env.JOB_URL }}#step:5:1
+            [1b]: ${{ env.JOB_URL }}#step:6:1
+            [2a]: ${{ env.JOB_URL }}#step:7:1
+            [2b]: ${{ env.JOB_URL }}#step:8:1
           GITHUB_TOKEN: ${{ github.token }}
