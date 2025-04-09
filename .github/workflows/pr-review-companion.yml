@@ -44,7 +44,7 @@ jobs:
 
       - name: Determine job url
         run: |
-          job_id=$(gh api repos/${{ github.repository }}/actions/run/${{ github.run_id }}/jobs --jq '.jobs[0].id')
+          job_id=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs --jq '.jobs[0].id')
           echo "JOB_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${job_id}" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ github.token }}
